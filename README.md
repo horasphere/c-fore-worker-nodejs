@@ -1,6 +1,6 @@
-# c-fore-worker-nodejs
+# c-force-worker-nodejs
 
-C-fore Node.js worker registration
+C-force Node.js worker registration
 
 # Sample
 
