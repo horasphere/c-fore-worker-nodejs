@@ -1,9 +1,10 @@
 {
   "name": "@timesphere/cforce-worker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "private": false,
   "main": ".dist/index.js",
+  "types": ".dist/index.d.ts",
   "scripts": {
     "prebuild": "rimraf .dist",
     "prepare": "npm run build",
@@ -15,7 +16,8 @@
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.5.2",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "tmp": "0.0.33"
   },
   "devDependencies": {
     "@types/node": "^10.12.10",

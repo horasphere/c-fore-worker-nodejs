@@ -2,7 +2,9 @@ import {promisify} from 'util';
 import * as amqp from 'amqplib/callback_api';
 import {ConfigOptions, JobResponse, JobResponseStatus, WorkerOptions} from "./types";
 import * as request from 'request';
-import {PassThrough, Readable} from "stream";
+import * as tmp from 'tmp';
+import {PassThrough, Readable, Writable} from "stream";
+import * as fs from "fs";
 
 const QUEUE_PREFIX = `c-fore.worker`;
 
@@ -65,7 +67,7 @@ export class Supervisor {
             channel.ack(msg);
         }, {noAck: false});
     }
-    getAttachment(jobId, name): Readable {
+    getAttachmentAsStream(jobId, name): Readable {
         const options = {
             method: 'GET',
             url: `${this.baseUrl}/jobs/${jobId}/attachments/${name}/blob`,
@@ -76,7 +78,35 @@ export class Supervisor {
 
         return request(options).pipe(new PassThrough());
     }
-    async attachOutputFile(jobId: string, filename: string, readableStream: Readable): Promise<any> {
+
+    async getAttachmentAsLocalTempFile(jobId: string, filename: string): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const tmpInputPath = await this.createTmpFile();
+                const inputStream = this.getAttachmentAsStream(jobId, filename);
+                await this.streamToWritable(inputStream, fs.createWriteStream(tmpInputPath));
+
+                return resolve(tmpInputPath);
+            }
+            catch(err) {
+                reject(err);
+            }
+        })
+    }
+
+    async removeLocalFile(filename: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            fs.unlink(filename, (err) => {
+                if(err) {
+                    return reject(err);
+                }
+
+                return resolve();
+            })
+        })
+    }
+
+    async uploadOutputFile(jobId: string, filename: string, readableStream: Readable): Promise<void> {
         const options = {
             method: 'POST',
             url: `${this.baseUrl}/jobs/${jobId}/attachments/${filename}/blob?type=OUTPUT`,
@@ -85,7 +115,7 @@ export class Supervisor {
             }
         };
 
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             readableStream
                 .pipe(request(options))
                 .on('response', (response) => {
@@ -98,6 +128,37 @@ export class Supervisor {
                 .on('error', function(err) {
                     reject(err)
                 })
+        })
+    }
+
+    async createTmpFile(): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            tmp.file((err, path, fd, cleanupCallback) => {
+                if(err) {
+                    return reject(err);
+                }
+
+                return resolve(path)
+            })
+        })
+    }
+
+    async streamToWritable(inputStream: Readable, writableStream: Writable): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            try {
+                inputStream.pipe(writableStream);
+
+                inputStream.on('end', () => {
+                    resolve();
+                })
+
+                inputStream.on('error', (err) => {
+                    reject(err);
+                })
+            }
+            catch(err) {
+                reject(err)
+            }
         })
     }
 }
