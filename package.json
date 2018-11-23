@@ -1,0 +1,25 @@
+{
+  "name": "@timesphere/c-fore-worker",
+  "version": "0.0.0",
+  "description": "",
+  "main": ".dist/index.js",
+  "scripts": {
+    "prebuild": "rimraf .dist",
+    "prepublish": "npm run build",
+    "build": "tsc",
+    "build:watch": "tsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.10",
+    "cross-env": "^5.2.0",
+    "rimraf": "^2.6.2",
+    "typescript": "^3.1.6"
+  }
+}
