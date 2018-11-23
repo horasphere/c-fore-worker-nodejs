@@ -2,10 +2,11 @@
   "name": "@timesphere/c-fore-worker",
   "version": "1.0.0",
   "description": "",
+  "private": false,
   "main": ".dist/index.js",
   "scripts": {
     "prebuild": "rimraf .dist",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "build": "tsc",
     "build:watch": "tsc -w"
   },
