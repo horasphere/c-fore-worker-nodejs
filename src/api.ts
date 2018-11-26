@@ -61,8 +61,13 @@ export class Api {
                 "Content-Type": 'application/octet-stream'
             }
         };
+        
         return new Promise<void>((resolve, reject) => {
             fs.createReadStream(filepath)
+                .on('error', function(err) {
+                    reject(err)
+                })
+                .pipe(request(options))
                 .on('response', (response) => {
                     if(response.statusCode === 200) {
                         return resolve();
@@ -70,10 +75,6 @@ export class Api {
 
                     reject('could not complete request');
                 })
-                .on('error', function(err) {
-                    reject(err)
-                })
-                .pipe(request(options))
         })
     }
 }
