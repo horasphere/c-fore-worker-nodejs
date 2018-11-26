@@ -1,4 +1,4 @@
-import {Supervisor} from "./supervisor";
+import {IExecutionContext} from "./execution-context";
 
 export type ConfigOptions = {
     rabbitmqUrl: string
@@ -8,7 +8,7 @@ export type ConfigOptions = {
 export type WorkerOptions = {
     appId: string,
     appVersion: string,
-    execute(jobId: string, parameters: object, attachments: Attachment[], supervisor: Supervisor): Promise<JobResponse>
+    execute(executionContext: IExecutionContext): Promise<string[]> // returns outputfiles
 }
 
 export enum AttachmentType {
@@ -32,4 +32,10 @@ export type JobResponse = {
     status: JobResponseStatus,
     message: string,
     details: {}
+}
+
+export type Job = {
+    id: string;
+    parameters: object;
+    attachments: Attachment[]
 }

@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.5.2",
+    "debug": "^4.1.0",
     "request": "^2.88.0",
     "tmp": "0.0.33"
   },
